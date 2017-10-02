@@ -1,7 +1,6 @@
 package strings
 
 import (
-	"errors"
 	"fmt"
 	"math"
 	"strings"
@@ -22,60 +21,64 @@ type BijectiveReplacement struct {
 	to   string
 }
 
+func containsKeyWord(str string, keywords []string) bool {
+
+	for _, keyword := range keywords {
+		if keyword == strings.Trim(str, " ") {
+			return true
+		}
+	}
+	return false
+}
+
+func containsLineBreak(str string) bool {
+
+	return strings.Contains(str, "\n")
+}
+
+func removeLineBreaks(str string) string {
+	return strings.Replace(strings.Replace(str, "\n", "", -1), "\t", "", -1)
+}
+
+func encodeCode(code string) {
+
+	keywords := []string{"{", "}", "+", "=", "]", "[", ")", "(", ";", "for", "if", "while", "<", ".", "-", ">"}
+
+	for _, keyword := range keywords {
+		code = strings.Replace(code, keyword, " "+keyword+" ", -1)
+	}
+
+	encodedCode := ""
+
+	splited := strings.Split(code, " ")
+
+	fmt.Println(splited)
+
+	for awdawd, str := range strings.Split(code, " ") {
+
+		fmt.Printf("reading {%s} at %d\n", str, awdawd)
+
+		if str != "" {
+
+			if containsKeyWord(str, keywords) {
+				encodedCode += strings.Trim(str, " ") + " "
+			} else if containsLineBreak(str) {
+
+				encodedCode += removeLineBreaks(str) + "\n"
+			} else {
+				fmt.Printf(str)
+				encodedCode += "# "
+			}
+		}
+
+	}
+
+	fmt.Println(encodedCode)
+
+}
+
 func (bm *BijectiveMorphisme) find() {
-	alphaAlphabet := strings.Split(bm.source, " ")
-	betaAlphabet := strings.Split(bm.target, " ")
 
-	bm.morphismes = LevenshteinDistance2(alphaAlphabet, len(alphaAlphabet), betaAlphabet, len(betaAlphabet))
-	bm.reduceMorphisme()
-	printBijectivesReplacements(bm.morphismes)
-	bm.apply()
-	fmt.Printf("source = %s,\n target = %s,\n transo = %s\n", bm.source, bm.target, bm.transformed)
-
-	printAlphabets(alphaAlphabet, betaAlphabet)
-}
-
-func (bm *BijectiveMorphisme) reduceMorphisme() error {
-
-	knownMorphisme := make(map[string]*BijectiveReplacement)
-	tmpReplacements := bm.morphismes
-	bm.morphismes = nil
-
-	for _, morphisme := range tmpReplacements {
-
-		if _, contains := knownMorphisme[morphisme.from]; contains && knownMorphisme[morphisme.from].to != morphisme.to {
-			return errors.New("Add")
-		}
-		bm.morphismes = append(bm.morphismes, morphisme)
-
-	}
-
-	return nil
-
-}
-
-func (bm *BijectiveMorphisme) apply() {
-
-	bm.transformed = bm.source
-	for _, br := range bm.morphismes {
-		bm.transformed = strings.Replace(bm.transformed, br.from, br.to, -1)
-	}
-}
-
-func printBijectivesReplacements(replacements []*BijectiveReplacement) {
-	for _, replacement := range replacements {
-		fmt.Printf("%s -> %s,", replacement.from, replacement.to)
-	}
-}
-
-func printAlphabets(alphabets ...[]string) {
-
-	for _, alphabet := range alphabets {
-		fmt.Println()
-		for _, token := range alphabet {
-			fmt.Printf("%s,", token)
-		}
-	}
 }
 
 func LCS(first, second string) (int, string) {
