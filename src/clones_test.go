@@ -1,4 +1,4 @@
-package strings
+package gcd
 
 import (
 	"testing"
@@ -67,29 +67,6 @@ func TestEncodeCode(t *testing.T) {
 
 }
 
-func TestLevenshteinDistance(t *testing.T) {
-	type args struct {
-		s    string
-		lenS int
-		t    string
-		lenT int
-	}
-	tests := []struct {
-		name string
-		args args
-		want int
-	}{
-		{"1", args{"kitten", 6, "sitting", 7}, 3},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := LevenshteinDistance(tt.args.s, tt.args.lenS, tt.args.t, tt.args.lenT); got != tt.want {
-				t.Errorf("LevenshteinDistance() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func TestLCS(t *testing.T) {
 	type args struct {
 		first  string
@@ -123,30 +100,17 @@ func TestLCS(t *testing.T) {
 
 func TestBijectiveMorphisme_find(t *testing.T) {
 	type fields struct {
-		morphismes          []*BijectiveReplacement
-		source              string
-		target              string
-		transformed         string
-		LevenshteinDistance int
-		lcs                 int
-		lcsString           string
+		morphismes  []*BijectiveReplacement
+		source      string
+		target      string
+		transformed string
+		cloneType   int
+		simlarity   float32
 	}
 	tests := []struct {
 		name   string
 		fields fields
 	}{
-
-		// {"Test ints",
-		// 	fields{
-		// 		nil,
-		// 		`int a = 2`,
-		// 		`int b = 3`,
-		// 		"",
-		// 		0,
-		// 		0,
-		// 		"",
-		// 	},
-		// },
 		{"Test bubble sorts",
 			fields{
 				nil,
@@ -178,22 +142,24 @@ func TestBijectiveMorphisme_find(t *testing.T) {
 				"",
 				0,
 				0,
-				"",
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			bm := &BijectiveMorphisme{
-				morphismes:          tt.fields.morphismes,
-				source:              tt.fields.source,
-				target:              tt.fields.target,
-				transformed:         tt.fields.transformed,
-				LevenshteinDistance: tt.fields.LevenshteinDistance,
-				lcs:                 tt.fields.lcs,
-				lcsString:           tt.fields.lcsString,
+				morphismes:  tt.fields.morphismes,
+				source:      tt.fields.source,
+				target:      tt.fields.target,
+				transformed: tt.fields.transformed,
 			}
-			bm.find()
+			bm.check()
+
+			if bm.cloneType != type2 || bm.simlarity != 38.095238 {
+				t.Errorf("Should be type 2 got %d. Should be 38.095238 got %f",
+					bm.cloneType, bm.simlarity)
+
+			}
 		})
 	}
 }
