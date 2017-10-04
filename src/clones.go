@@ -17,10 +17,14 @@ type BijectiveMorphisme struct {
 	morphismes       []*BijectiveReplacement
 	source           string
 	encodedSource    string
-	cloneType        int
-	simlarity        float32
 	sourceLines      []string
 	sourcePrettyfied []string
+	target           string
+	encodedTarget    string
+	targetLines      []string
+	targetPrettyfied []string
+	cloneType        int
+	simlarity        float32
 	limit            int
 }
 
@@ -30,6 +34,7 @@ type BijectiveReplacement struct {
 	to   string
 }
 
+//New create a new BijectiveMorphisme
 func New(source string, limit int) *BijectiveMorphisme {
 
 	bm := &BijectiveMorphisme{
@@ -41,6 +46,15 @@ func New(source string, limit int) *BijectiveMorphisme {
 	bm.sourceLines = strings.Split(bm.encodedSource, "\n")
 	bm.sourcePrettyfied = prettyfy(bm.source)
 	return bm
+}
+
+//AddTarget receives a target to analyze
+func (bm *BijectiveMorphisme) AddTarget(target string, encodedTarget string, targetLines []string, targetPrettyfied []string) {
+
+	bm.target = target
+	bm.encodedTarget = encodedTarget
+	bm.targetLines = targetLines
+	bm.targetPrettyfied = targetPrettyfied
 }
 
 func prettyfy(code string) []string {
@@ -64,11 +78,7 @@ func prettyfy(code string) []string {
 	return results
 }
 
-func (bm *BijectiveMorphisme) check(code string) (int, float32, string) {
-
-	targetEncoded, _, _ := encodeCode(code)
-
-	targetLines := strings.Split(targetEncoded, "\n")
+func (bm *BijectiveMorphisme) check() (int, float32, string) {
 
 	compareCode := func(source []string, target []string) (int, int, int) {
 
@@ -110,11 +120,11 @@ func (bm *BijectiveMorphisme) check(code string) (int, float32, string) {
 
 	var startSource, startTarget, lines int
 
-	if len(bm.sourceLines) > len(targetLines) {
+	if len(bm.sourceLines) > len(bm.targetLines) {
 
-		startSource, startTarget, lines = compareCode(bm.sourceLines, targetLines)
+		startSource, startTarget, lines = compareCode(bm.sourceLines, bm.targetLines)
 	} else {
-		startSource, startTarget, lines = compareCode(targetLines, bm.sourceLines)
+		startSource, startTarget, lines = compareCode(bm.targetLines, bm.sourceLines)
 	}
 
 	if lines > bm.limit {
@@ -127,8 +137,6 @@ func (bm *BijectiveMorphisme) check(code string) (int, float32, string) {
 			return false
 		}
 
-		target := prettyfy(code)
-
 		bijs := []*BijectiveReplacement{}
 
 		for i := 0; i < lines; i++ {
@@ -139,7 +147,7 @@ func (bm *BijectiveMorphisme) check(code string) (int, float32, string) {
 				sourceLine = strings.Replace(sourceLine, keyword, " ", -1)
 			}
 
-			targetLine := target[startTarget+i]
+			targetLine := bm.targetPrettyfied[startTarget+i]
 
 			for _, keyword := range []string{";", "}", "{", "(", ")"} {
 				targetLine = strings.Replace(targetLine, keyword, " ", -1)
@@ -164,7 +172,7 @@ func (bm *BijectiveMorphisme) check(code string) (int, float32, string) {
 
 	}
 
-	return bm.cloneType, bm.simlarity, bm.transform(code)
+	return bm.cloneType, bm.simlarity, bm.transform(bm.target)
 
 }
 

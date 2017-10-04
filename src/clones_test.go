@@ -147,12 +147,10 @@ func TestBijectiveMorphisme_find(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			bm := &BijectiveMorphisme{
-				morphismes:  tt.fields.morphismes,
-				source:      tt.fields.source,
-				target:      tt.fields.target,
-				transformed: tt.fields.transformed,
-			}
+			bm := New(tt.fields.source, 5)
+			targetBm := New(tt.fields.target, 5)
+
+			bm.AddTarget(targetBm.source, targetBm.encodedSource, targetBm.sourceLines, targetBm.sourcePrettyfied)
 			bm.check()
 
 			if bm.cloneType != type2 || bm.simlarity != 38.095238 {
